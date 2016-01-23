@@ -2,87 +2,74 @@ import curses
 import time
 from brewtroller import *
 
+# keep track of a liquid tun
 class Tun:
-    # window size
-    height=13
-    width=11
-
     temperature=-3222
     power=-223
     setpoint=-443
 
-    # temperature display position in the window
-    tempx=3
-    tempy=3
-
-    def __init__(self,bt,myid,title,x,y):
+    def __init__(self,bt,myid,title):
         self.id = myid
-        self.win = curses.newwin(self.height, self.width, x, y)
-        self.win.border("|","|","-","-","/","\\","\\","/")
-        self.win.addstr(0,(self.width-len(title))/2,title)
-        self.win.addstr(2,3,"Temp:",curses.A_BOLD)
-        self.win.addstr(5,3,"Set:",curses.A_BOLD)
-        self.win.addstr(8,3,"Power:",curses.A_BOLD)
         self.bt = bt
 
     def update(self):
-        redraw=0
-        # get temperature
-        temperature=self.bt.getTemp(self.id)
-        if self.temperature != temperature:
-            self.temperature = temperature
-            redraw = 1
+        self.newtemperature=self.bt.getTemp(self.id)
+        self.newsetpoint=self.bt.getSetpoint(self.id)
+        self.newpower=self.bt.getHeatpwr(self.id)
 
-            if temperature > 150: # easy, ugly check if there is no sensor
-                self.win.addstr(3,3,"ERROR",curses.A_BLINK)
-            else:
-                self.win.addstr(3,3,"     ") # erase first
-                self.win.addstr(3,3,str(temperature))
+# keep track of the HLT recirculation
+# bt assumptions:
+# bt configured to four outputs, only one is used for heating.
+# continous recirculation of the HLT
+# mash pump turned on manually (or by linux) when the MLT is filled
 
-        # get setpoint
+# pin assignments:
+ #define VALVE1_PIN 20 //OUT3 - HLT recirc
+ #define VALVE2_PIN 19 //OUT4 - Fill MLT
+ #define VALVE3_PIN 18 //OUT5 - MLT recirc
+ #define VALVE4_PIN 21 // OUT2 - Fill Boil
+ #define HLTHEAT_PIN 22 //OUT1
 
-        setpoint=self.bt.getSetpoint(self.id)
-        if self.setpoint != setpoint:
-            self.setpoint=setpoint
-            redraw = 1
 
-            self.win.addstr(6,3,"     ") # erase first
-            self.win.addstr(6,3,str(setpoint))
-
-        # get heatingpower
-
-        power=self.bt.getHeatpwr(self.id)
-
-        if self.power != power:
-            redraw=1
-            self.power=power
-            self.win.addstr(9,3,"     ") # erase first
-            self.win.addstr(9,3,str(power)+"%")
-
-        if redraw == 1:
-            self.win.refresh()
-
-class Pump:
-    state=0 # 0 - recirc, 1 - fill 
-    
-    def __init__(self,x,y,width,height):
-        self.win =  curses.newwin(height, width, y, x)
-        #self.win.hline(10,0,"=",width)
-        #self.win.border()
-        self.width=width
-        self.height=height
+class HLTRecirc:
+    state=-1234 # 0 - valve 0, 1 - valve 1 
+    newstate=0
 
     def update(self):
         # here is code to check the state of the valves
-        # if newstate != oldstate then redraw...
+        # change "newstate"
+        self.newstate=self.state
 
-        self.win.erase()
+    def __init__(self,bt):
+        self.bt = bt
+        HLTRecirc.update(self)
         
-        if self.state == 0:
-            self.win.hline(10,0,">",2)
-            self.win.hline(2,0,"<",2)
-            self.win.vline(2,2,"^",8)
-        else:
-            self.win.hline(10,0,">",self.width)
+class BrewStep:
+    step=-234 
+    newstep=0
 
-        self.win.refresh()
+    stepnames = {
+        0: "FILL",
+        1: "DELAY",
+        2: "PRE-HEAT",
+        3: "ADD GRAIN",
+        4: "REFILL",
+        5: "DOUGH IN",
+        6: "ACID REST",
+        7: "PROTEIN REST",
+        8: "SACC 1",
+        9: "SACC 2",
+        10: "MASH OUT",
+        11: "MASH OUT HOLD",
+        12: "SPARGE",
+        13: "BOIL",
+        14: "CHILL",
+        255: "IDLE"
+        };
+
+    def update(self):
+        self.newstep=self.bt.getProgramStep()
+
+    def __init__(self,bt):
+        self.bt = bt
+        BrewStep.update(self)

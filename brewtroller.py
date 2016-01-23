@@ -27,3 +27,10 @@ class BrewTroller:
     def getHeatpwr(self,tunid):
         response=self.sendCommand("s"+str(tunid))
         return round(float(response[2]),0) # this does not seem to be multiplied with 100
+
+    def getProgramStep(self):
+        response = self.sendCommand("n")
+        if int(response[2])<255:
+            return int(response[2])
+        else:
+            return int(response[4])
