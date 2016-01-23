@@ -7,6 +7,10 @@ class Tun:
     height=13
     width=11
 
+    temperature=-3222
+    power=-223
+    setpoint=-443
+
     # temperature display position in the window
     tempx=3
     tempy=3
@@ -22,31 +26,41 @@ class Tun:
         self.bt = bt
 
     def update(self):
+        redraw=0
         # get temperature
         temperature=self.bt.getTemp(self.id)
-        self.temperature = temperature
+        if self.temperature != temperature:
+            self.temperature = temperature
+            redraw = 1
 
-        if temperature > 150: # easy, ugly check if there is no sensor
-            self.win.addstr(3,3,"ERROR",curses.A_BLINK)
-        else:
-            self.win.addstr(3,3,"     ") # erase first
-            self.win.addstr(3,3,str(temperature))
+            if temperature > 150: # easy, ugly check if there is no sensor
+                self.win.addstr(3,3,"ERROR",curses.A_BLINK)
+            else:
+                self.win.addstr(3,3,"     ") # erase first
+                self.win.addstr(3,3,str(temperature))
 
         # get setpoint
 
         setpoint=self.bt.getSetpoint(self.id)
-        self.setpoint=setpoint
-        self.win.addstr(6,3,"     ") # erase first
-        self.win.addstr(6,3,str(setpoint))
+        if self.setpoint != setpoint:
+            self.setpoint=setpoint
+            redraw = 1
+
+            self.win.addstr(6,3,"     ") # erase first
+            self.win.addstr(6,3,str(setpoint))
 
         # get heatingpower
 
         power=self.bt.getHeatpwr(self.id)
-        self.power=power
-        self.win.addstr(9,3,"     ") # erase first
-        self.win.addstr(9,3,str(power)+"%")
 
-        self.win.refresh()
+        if self.power != power:
+            redraw=1
+            self.power=power
+            self.win.addstr(9,3,"     ") # erase first
+            self.win.addstr(9,3,str(power)+"%")
+
+        if redraw == 1:
+            self.win.refresh()
 
 class Pump:
     state=0 # 0 - recirc, 1 - fill 
