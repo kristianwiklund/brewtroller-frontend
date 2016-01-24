@@ -8,7 +8,7 @@ class Tun:
     power=-223
     setpoint=-443
 
-    def __init__(self,bt,myid,title):
+    def __init__(self,bt,myid):
         self.id = myid
         self.bt = bt
 
