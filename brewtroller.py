@@ -55,3 +55,41 @@ class BrewTroller:
         # 29 and onwards is the program steps
         
         return r
+
+    def getProgram(self, progid):
+        u = self.sendCommand("@"+str(progid))
+        r = {}
+        
+        r["id"] = progid
+        r["name"] = u[2]
+        r["volume"] = u[3]
+        r["grainweight"] = u[4]
+        r["ratio"] = u[5]
+
+        # 6 mash steps. using the same index as for the brewsteps
+
+        # dough in
+        r[5]["setpoint"] = u[6]
+        r[5]["time"] = u[7]
+
+        # acid rest
+        r[6]["setpoint"] = u[8]
+        r[6]["time"] = u[9]
+
+        # protein rest
+        r[7]["setpoint"] = u[10]
+        r[7]["time"] = u[11]
+
+        # sacc 1
+        r[8]["setpoint"] = u[12]
+        r[8]["time"] = u[13]
+
+        # sacc 2
+        r[9]["setpoint"] = u[14]
+        r[9]["time"] = u[15]
+
+        # mash out
+        r[10]["setpoint"] = u[16]
+        r[10]["time"] = u[17]
+
+        return r
