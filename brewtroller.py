@@ -56,6 +56,9 @@ class BrewTroller:
         
         return r
 
+    def advStep(self):
+        self.sendCommand("S")
+
     def getProgram(self, progid):
         u = self.sendCommand("@"+str(progid))
         r = {}

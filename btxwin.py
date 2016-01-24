@@ -57,10 +57,15 @@ class XProgramStatus:
 
      oldstep=255
      
-     def __init__(self, w, bt,stepWidgets):
+     def __init__(self, w, bt,stepWidgets,nextwidget):
           self.BrewStep = BrewStep(bt)
           self.stepWidgets = stepWidgets
+          nextwidget.clicked.connect(self.nextstep)
+          
           self.bt = bt
+
+     def nextstep(self):
+          self.bt.advStep()
 
      def update(self):
           # if the brewstep is 255 the system is idle
@@ -139,12 +144,13 @@ class MainWin(QtGui.QMainWindow):
               9: self.ui.progressacc2,
               10: self.ui.progressmashout
               }
-         self.programstatus = XProgramStatus(self.ui, bt, stepwidgets)
+         self.programstatus = XProgramStatus(self.ui, bt, stepwidgets,self.ui.nextProgStep)
 
          # init callbacks
 
+     
 
-     # callback functions
+     # callback function
 
      def updateui(self):
           self.MLT.update()
