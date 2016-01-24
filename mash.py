@@ -73,3 +73,7 @@ class BrewStep:
     def __init__(self,bt):
         self.bt = bt
         BrewStep.update(self)
+    
+    def getStep(self):
+        self.update()
+        return self.newstep

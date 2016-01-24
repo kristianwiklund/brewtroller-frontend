@@ -34,3 +34,24 @@ class BrewTroller:
             return int(response[2])
         else:
             return int(response[4])
+
+    def getFullStatus(self):
+        u = self.sendCommand("a")
+        r = {}
+        r["alarmstatus"] = u[2]
+        # 3,4,5 is valve status
+        r["HLT"] = {"setpoint": u[6], "temp": u[7], "power": u[8], "targetvol": u[9], "vol": u[10]}
+        # 11 is flow rate
+        r["MLT"] = {"setpoint": u[12], "temp": u[13], "power": u[14], "targetvol": u[15], "vol": u[16]}
+        # 17 is flow rate
+        r["BK"] = {"setpoint": u[18], "temp": u[19], "power": u[20], "targetvol": u[21], "vol": u[22]}
+        # 23 is flow rate
+
+        # timers in milliseconds
+        r["mashtimer"] = {"value": u[24], "status": u[25]}
+        r["boiltimer"] = {"value": u[26], "status": u[27]}
+
+        # 28 boil control state
+        # 29 and onwards is the program steps
+        
+        return r

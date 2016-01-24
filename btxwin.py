@@ -53,7 +53,36 @@ class XTun(Tun):
                     self.temperatureWidget.setHexMode()
                     self.temperatureWidget.display(int("dead",16))
                     
+class XProgramStatus:
 
+     oldstep=255
+     
+     def __init__(self, w, bt,stepWidgets):
+          self.BrewStep = BrewStep(bt)
+          self.stepWidgets = stepWidgets
+          self.bt = bt
+
+     def update(self):
+          # if the brewstep is 255 the system is idle
+          brewstep = self.BrewStep.getStep()
+
+
+          if brewstep != 255:
+               # need to update the progress bars and display which step is active
+               fullstatus = self.bt.getFullStatus()
+               print ("step" + str(brewstep))
+               print (fullstatus)
+
+               # put text on the active step
+               if self.oldstep != brewstep:
+                    for key in self.stepWidgets:
+                         if key == brewstep:
+                              self.stepWidgets[key].setTextVisible(True) 
+                         else:
+                              self.stepWidgets[key].setTextVisible(False)
+                    self.oldstep = brewstep
+
+          
 class MainWin(QtGui.QMainWindow):
      def __init__(self,bt):
          QtGui.QMainWindow.__init__(self)
@@ -65,6 +94,17 @@ class MainWin(QtGui.QMainWindow):
 
          self.HLT = XTun(self.ui, bt, 0, self.ui.HLTSet, self.ui.HLTTemp, self.ui.toggleHLT, self.ui.HLTdial)
          self.MLT = XTun(self.ui, bt, 1, self.ui.MLTSet, self.ui.MLTTemp, self.ui.toggleMLT, self.ui.MLTdial)
+         
+         stepwidgets = {
+              2: self.ui.progresspreheat,
+              5: self.ui.progressdoughin,
+              6: self.ui.progressacidrest,
+              7: self.ui.progressproteinrest,
+              8: self.ui.progressacc1,
+              9: self.ui.progressacc2,
+              10: self.ui.progressmashout
+              }
+         self.programstatus = XProgramStatus(self.ui, bt, stepwidgets)
 
          # init callbacks
 
@@ -74,6 +114,7 @@ class MainWin(QtGui.QMainWindow):
      def updateui(self):
           self.MLT.update()
           self.HLT.update()
+          self.programstatus.update()
 
 
 ### main
