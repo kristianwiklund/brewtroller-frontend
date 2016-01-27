@@ -1,0 +1,42 @@
+Need to find out: How to step forward in the brew program by remote control, this seems to behave a bit strangely.
+
+Various notes:
+
+
+
+brew steps:
+
+command n
+
+fill step:     ["54888","n","0","2","255","255"]
+preheat step: ["114373","n","2","2","255","255"]
+grain step:   ["152001","n","3","2","255","255"]
+refill step:  ["193213","n","4","2","255","255"]
+dough in:     ["217355","n","5","2","255","255"]
+sacc 1:       ["257936","n","8","2","255","255"]
+mash out:     ["284057","n","10","2","255","255"]
+end mash:     ["316640","n","11","2","255","255"]
+sparge:       ["350851","n","12","2","255","255"]
+boil:         ["371557","n","255","255","13","2"]
+chill:        ["407111","n","255","255","14","2"]
+
+first 2 are "mash zone"
+second 2 are "boil zone"
+
+#define STEP_FILL 0
+#define STEP_DELAY 1
+#define STEP_PREHEAT 2
+#define STEP_ADDGRAIN 3
+#define STEP_REFILL 4
+#define STEP_DOUGHIN 5
+#define STEP_ACID 6
+#define STEP_PROTEIN 7
+#define STEP_SACCH 8
+#define STEP_SACCH2 9
+#define STEP_MASHOUT 10
+#define STEP_MASHHOLD 11
+#define STEP_SPARGE 12
+#define STEP_BOIL 13
+#define STEP_CHILL 14
+
+
