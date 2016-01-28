@@ -31,7 +31,8 @@ class TehFigure:
         self.figure = Figure(figsize=(5,4), dpi=100) # magic numbers
         self.axes=self.figure.add_subplot(111) # more magic
         self.canvas = FigureCanvas(self.figure)
-        
+        self.lines, = self.axes.plot([],[], '-o')
+        self.axes.set_ylim(0, 100)        
         self.compute_initial_figure()
         self.canvas.updateGeometry()
 
@@ -39,10 +40,19 @@ class TehFigure:
         
 
     def compute_initial_figure(self):
-        t = arange(0.0, 3.0, 0.01)
-        s = sin(2*pi*t)
-        self.axes.plot(t, s)
+        pass
 
+    def update_plot(self, xdata, ydata, tunid):
+        if tunid == 0:
+        #Update data (with the new _and_ the old points)
+            self.lines.set_xdata(xdata)
+            self.lines.set_ydata(ydata)
+        #Need both of these in order to rescale
+            self.axes.relim()
+            self.axes.autoscale_view()
+        #We need to draw *and* flush
+            self.figure.canvas.draw()
+            self.figure.canvas.flush_events()
 
 
 UI_FILE = 'lodda.ui'		# qt ui descriptor
@@ -84,10 +94,12 @@ class XTun(Tun):
                          self.temperatureWidget.display(self.newtemperature)
                          self.temperatureWidget.setStyleSheet("QLCDNumber{color:red;}")
                          self.temperature = self.newtemperature
-                         self.xdata.append(self.ticker)
-                         self.ticker=self.ticker+1
-                         self.ydata.append(self.newtemperature)
-                         self.plot.update_plot(self.xdata, self.ydata, self.id)
+                    
+                    self.xdata.append(self.ticker)
+                    self.ticker=self.ticker+1
+                    print "ticker"+str(self.ticker)
+                    self.ydata.append(self.newtemperature)
+                    self.plot.update_plot(self.xdata, self.ydata, self.id)
                else:
                     self.temperatureWidget.setHexMode()
                     self.temperatureWidget.display(int("dead",16))
