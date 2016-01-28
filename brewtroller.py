@@ -38,6 +38,7 @@ class BrewTroller:
     def getFullStatus(self):
         u = self.sendCommand("a")
         r = {}
+        r["timestamp"] = u[0]
         r["alarmstatus"] = u[2]
         # 3,4,5 is valve status
         r["HLT"] = {"setpoint": u[6], "temp": u[7], "power": u[8], "targetvol": u[9], "vol": u[10]}

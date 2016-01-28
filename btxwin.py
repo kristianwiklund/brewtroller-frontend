@@ -29,10 +29,13 @@ class TehFigure:
 
     def __init__(self, layoutwidget):
         self.figure = Figure(figsize=(5,4), dpi=100) # magic numbers
-        self.axes=self.figure.add_subplot(111) # more magic
+        self.axes1=self.figure.add_subplot(111) # more magic
+        self.axes2=self.figure.add_subplot(111) # more magic
         self.canvas = FigureCanvas(self.figure)
-        self.lines, = self.axes.plot([],[], '-o')
-        self.axes.set_ylim(0, 100)        
+        self.lines1, = self.axes1.plot([],[], '-')
+        self.lines2, = self.axes2.plot([],[], '-')
+        self.axes1.set_ylim(0, 100)        
+        self.axes2.set_ylim(0, 100)        
         self.compute_initial_figure()
         self.canvas.updateGeometry()
 
@@ -42,17 +45,25 @@ class TehFigure:
     def compute_initial_figure(self):
         pass
 
-    def update_plot(self, xdata, ydata, tunid):
-        if tunid == 0:
+    def update_plot(self, xdata, ydata):
+        # we need to split this somehow.
+
         #Update data (with the new _and_ the old points)
-            self.lines.set_xdata(xdata)
-            self.lines.set_ydata(ydata)
+        self.lines1.set_xdata(xdata["HLT"])
+        self.lines1.set_ydata(ydata["HLT"])
+        self.lines2.set_xdata(xdata["MLT"])
+        self.lines2.set_ydata(ydata["MLT"])
         #Need both of these in order to rescale
-            self.axes.relim()
-            self.axes.autoscale_view()
+        self.axes1.relim()
+        self.axes1.autoscale_view()
+        self.axes2.relim()
+        self.axes2.autoscale_view()
         #We need to draw *and* flush
-            self.figure.canvas.draw()
-            self.figure.canvas.flush_events()
+        self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
+
+    def annotate(self, x, y, text):
+        self.axes1.annotate(text, xy=(x,y),xytext=(x,50),arrowprops=dict(facecolor='black', arrowstyle="->"))
 
 
 UI_FILE = 'lodda.ui'		# qt ui descriptor
@@ -61,7 +72,6 @@ class XTun(Tun):
      
      setpointsaved = True
      manualsetpoint = 0 
-     ticker=0 # refactor away and replace with real timestamp
 
      def setSetpointManually(self, value):
           self.setpointsaved = False
@@ -69,12 +79,11 @@ class XTun(Tun):
           self.setPointWidget.setStyleSheet("QLCDNumber{color:blue;}")
           self.manualsetpoint = value
 
-     def __init__(self, w, bt, myid, setpoint, temperature, setbutton, dial, plot):
+     def __init__(self, w, bt, myid, setpoint, temperature, setbutton, dial):
           Tun.__init__(self,bt, myid)
           self.setPointWidget = setpoint
           self.dialWidget = dial
           self.temperatureWidget = temperature
-          self.plot = plot
 
           w.connect(dial,SIGNAL("valueChanged(int)"), partial(XTun.setSetpointManually,self))
           
@@ -95,11 +104,6 @@ class XTun(Tun):
                          self.temperatureWidget.setStyleSheet("QLCDNumber{color:red;}")
                          self.temperature = self.newtemperature
                     
-                    self.xdata.append(self.ticker)
-                    self.ticker=self.ticker+1
-                    print "ticker"+str(self.ticker)
-                    self.ydata.append(self.newtemperature)
-                    self.plot.update_plot(self.xdata, self.ydata, self.id)
                else:
                     self.temperatureWidget.setHexMode()
                     self.temperatureWidget.display(int("dead",16))
@@ -107,13 +111,20 @@ class XTun(Tun):
 class XProgramStatus:
 
      oldstep=255
+     xdata = {}
+     ydata = {}
+     xdata["HLT"] = []
+     ydata["HLT"] = []
+     xdata["MLT"] = []
+     ydata["MLT"] = []
      
-     def __init__(self, w, bt,stepWidgets,nextwidget,stopalarmwidget):
+
+     def __init__(self, w, bt,stepWidgets,nextwidget,stopalarmwidget,plot):
           self.BrewStep = BrewStep(bt)
           self.stepWidgets = stepWidgets
           nextwidget.clicked.connect(self.nextstep)
           stopalarmwidget.clicked.connect(self.stopalarm)
-
+          self.plot = plot
           self.bt = bt
 
      def stopalarm(self):
@@ -136,12 +147,27 @@ class XProgramStatus:
 
                # put text on the active step
           if self.oldstep != brewstep:
-               for key in self.stepWidgets:
-                    if key == brewstep:
-                         self.stepWidgets[key].setTextVisible(True) 
-                    else:
-                         self.stepWidgets[key].setTextVisible(False)
-               self.oldstep = brewstep
+              self.plot.annotate(fullstatus["timestamp"], float(fullstatus["MLT"]["temp"])/100, self.BrewStep.stepnames[brewstep])
+
+              for key in self.stepWidgets:
+                  if key == brewstep:
+                      self.stepWidgets[key].setTextVisible(True) 
+                  else:
+                      self.stepWidgets[key].setTextVisible(False)
+                      
+                  self.oldstep = brewstep
+                      
+               # update temperature plots
+
+          self.xdata["HLT"].append(fullstatus["timestamp"])
+          self.ydata["HLT"].append(float(fullstatus["HLT"]["temp"])/100)
+          
+          self.xdata["MLT"].append(fullstatus["timestamp"])
+          self.ydata["MLT"].append(float(fullstatus["MLT"]["temp"])/100)
+          print self.ydata
+          
+          self.plot.update_plot(self.xdata, self.ydata)
+
 
                # then figure out what the progress is.
                # for steps that are timer controlled, we can use the timer
@@ -190,8 +216,8 @@ class MainWin(QtGui.QMainWindow):
 
          sc = TehFigure(self.ui.plotlayout)
 
-         self.HLT = XTun(self.ui, bt, 0, self.ui.HLTSet, self.ui.HLTTemp, self.ui.toggleHLT, self.ui.HLTdial,sc)
-         self.MLT = XTun(self.ui, bt, 1, self.ui.MLTSet, self.ui.MLTTemp, self.ui.toggleMLT, self.ui.MLTdial,sc)
+         self.HLT = XTun(self.ui, bt, 0, self.ui.HLTSet, self.ui.HLTTemp, self.ui.toggleHLT, self.ui.HLTdial)
+         self.MLT = XTun(self.ui, bt, 1, self.ui.MLTSet, self.ui.MLTTemp, self.ui.toggleMLT, self.ui.MLTdial)
 
 
          stepwidgets = {
@@ -203,7 +229,7 @@ class MainWin(QtGui.QMainWindow):
               9: self.ui.progressacc2,
               10: self.ui.progressmashout
               }
-         self.programstatus = XProgramStatus(self.ui, bt, stepwidgets,self.ui.nextProgStep,self.ui.stopAlarm)
+         self.programstatus = XProgramStatus(self.ui, bt, stepwidgets,self.ui.nextProgStep,self.ui.stopAlarm,sc)
 
 
 
