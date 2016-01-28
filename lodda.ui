@@ -1174,7 +1174,7 @@ background:red;
          <height>501</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="temperaturelayout"/>
+       <layout class="QVBoxLayout" name="plotlayout"/>
       </widget>
      </widget>
     </widget>

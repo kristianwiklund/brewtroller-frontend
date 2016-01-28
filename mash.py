@@ -7,6 +7,10 @@ class Tun:
     temperature=-3222
     power=-223
     setpoint=-443
+    # to store data over time
+    xdata = []
+    ydata = []
+
 
     def __init__(self,bt,myid):
         self.id = myid
