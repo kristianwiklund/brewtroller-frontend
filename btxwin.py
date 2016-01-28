@@ -164,7 +164,7 @@ class XProgramStatus:
           
           self.xdata["MLT"].append(fullstatus["timestamp"])
           self.ydata["MLT"].append(float(fullstatus["MLT"]["temp"])/100)
-          print self.ydata
+#          print self.ydata
           
           self.plot.update_plot(self.xdata, self.ydata)
 
@@ -198,11 +198,19 @@ class XProgramStatus:
                     progress = (float(fullstatus["mashtimer"]["value"])/float(progdata[brewstep]["time"])/60000)
                     self.stepWidgets[brewstep].setValue(int(100*progress))                    
 
+          if brewstep==8 or brewstep==9: # the saccarification steps
+              self.stopalarm() # turn off the alarms as soon as possible - it is annoying. I don't really do anything here anyway
+              
+
 
           # logic to move one step forward automatically for some parts.
           # I personally do not care about:
           # delay, refill, and will skip ahead over those
-          
+
+          if brewstep==1 or brewstep==4 or brewstep==14:
+              self.stopalarm()
+              self.nextstep()
+              print "skipped step "+str(brewstep)
                     
           
 class MainWin(QtGui.QMainWindow):
