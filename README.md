@@ -2,7 +2,7 @@
 
 Started as a curses-based alternative to the web interface, but spun out of control and became a Qt interface.
 
-Dependencies: Python 2.7, PyQt
+Dependencies: Python 2.7, PyQt, requests
 
 License:
 

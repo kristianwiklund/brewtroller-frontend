@@ -77,7 +77,7 @@ background:red;
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -1137,7 +1137,7 @@ background:red;
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_4">
+           <widget class="QPushButton" name="stopAlarm">
             <property name="text">
              <string>Stop Alarm</string>
             </property>
@@ -1148,15 +1148,8 @@ background:red;
        </layout>
       </widget>
      </widget>
-     <zorder>horizontalLayoutWidget</zorder>
-     <zorder>groupBox</zorder>
-     <zorder>groupBox_2</zorder>
     </widget>
    </widget>
-   <zorder>horizontalSpacer_3</zorder>
-   <zorder>verticalLayoutWidget</zorder>
-   <zorder>Reset</zorder>
-   <zorder>tabWidget</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -1172,7 +1165,4 @@ background:red;
  </widget>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="automaticselect"/>
- </buttongroups>
 </ui>

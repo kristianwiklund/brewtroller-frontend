@@ -56,8 +56,12 @@ class BrewTroller:
         
         return r
 
+    def stopAlarm(self):
+        self.sendCommand("V&0")
+
     def advStep(self):
-        self.sendCommand("S")
+        x = self.getProgramStep()
+        self.sendCommand("S"+str(x))
 
     def getProgram(self, progid):
         u = self.sendCommand("@"+str(progid))

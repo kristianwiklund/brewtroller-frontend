@@ -1,4 +1,6 @@
-Need to find out: How to step forward in the brew program by remote control, this seems to behave a bit strangely.
+Need to find out: 
+How to step forward in the brew program by remote control, this seems to behave a bit strangely.
+possible answer: it seems like the step forward cmmand require the current step as argument
 
 Various notes:
 

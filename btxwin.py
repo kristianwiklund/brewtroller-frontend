@@ -32,7 +32,7 @@ class XTun(Tun):
           self.temperatureWidget = temperature
 
           w.connect(dial,SIGNAL("valueChanged(int)"), partial(XTun.setSetpointManually,self))
-
+          
      def update(self):
           if self.setpointsaved:
                Tun.update(self)
@@ -57,12 +57,17 @@ class XProgramStatus:
 
      oldstep=255
      
-     def __init__(self, w, bt,stepWidgets,nextwidget):
+     def __init__(self, w, bt,stepWidgets,nextwidget,stopalarmwidget):
           self.BrewStep = BrewStep(bt)
           self.stepWidgets = stepWidgets
           nextwidget.clicked.connect(self.nextstep)
-          
+          stopalarmwidget.clicked.connect(self.stopalarm)
+
           self.bt = bt
+
+     def stopalarm(self):
+          # code to change the alarm indicator back to inactive
+          self.bt.stopAlarm()
 
      def nextstep(self):
           self.bt.advStep()
@@ -144,7 +149,7 @@ class MainWin(QtGui.QMainWindow):
               9: self.ui.progressacc2,
               10: self.ui.progressmashout
               }
-         self.programstatus = XProgramStatus(self.ui, bt, stepwidgets,self.ui.nextProgStep)
+         self.programstatus = XProgramStatus(self.ui, bt, stepwidgets,self.ui.nextProgStep,self.ui.stopAlarm)
 
          # init callbacks
 
@@ -161,12 +166,14 @@ class MainWin(QtGui.QMainWindow):
 ### main
 
 # create a connection to the btnic daemon
-bt = BrewTroller("http://10.168.0.10/cgi-bin/btnic.cgi")
+bt = BrewTroller("http://10.168.0.129/cgi-bin/btnic.cgi")
 app = QtGui.QApplication(sys.argv)
 window = MainWin(bt)
+
+# set a timer that update the status every ten seconds
 timer = QTimer()
 timer.timeout.connect(window.updateui)
-timer.start(1000)
+timer.start(10000)
 
 
 sys.exit(app.exec_())
